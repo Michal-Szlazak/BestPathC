@@ -1,0 +1,198 @@
+\documentclass[12pt, a4paper]{article}
+\setlength\parindent{0pt}
+\usepackage{polski}
+\usepackage[utf8]{inputenc}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{graphicx}
+\usepackage{smartdiagram}
+\usepackage{graphicx}
+
+\pagestyle{fancy}
+\fancyhf{}
+\cfoot{\thepage\ z \pageref{LastPage}}
+
+\lhead{Sprawozdanie dot. programu \textit{Best path} (C)}
+\rhead{M.Szlązak, M.Kwiatkowski}
+
+
+\begin{document}
+\title{Sprawozdanie dot. programu\\ \textit{Best path} (C)}
+\date{9.04.2022}
+\author{Michał Szlązak, Maciek Kwiatkowski}
+\maketitle
+\tableofcontents
+\thispagestyle{empty}
+\cleardoublepage
+
+\newpage
+
+\setcounter{page}{1}
+
+\section{Wprowadzone zmiany w projekcie dotyczące specyfikacji funkcjonalnej}
+
+\subsection{Struktura katalogów}
+Stworzyliśmy oddzielny katalog ,,Documents", który przechowuje wszystkie dokumenty tekstowe związane z projektem. Nie udało nam się sprawić by tworzył plik generated\_graph (plik zawierający dane na temat wygenerowanego grafu) w katalogu ,,Files" -- z tego powodu plik jest tworzony w głównym katalogu ,,Project".
+
+\subsection{Komunikaty o błędach}
+Do programu musieliśmy wprowadzić nowe komunikaty o błędach, których nie przewidzieliśmy w trakcie tworzenia Specyfikacji Funkcjonalnej.
+\\
+Nowe komunikaty:
+\begin{itemize}
+    \item \texttt{ERROR: The number of vertices must be an even number.} -- error który pojawia się w momencie podania nieparzystej liczby wierzchołków.
+    \item \texttt{ERROR: memory allocation fail (\textit{file\_name}).} -- error, który pojawia się gdy komputer nie znajdzie wystarczającej ilości pamięci potrzebnej do poprawnego działania programu (\textit{file\_name} -- nazwa pliku w którym ERROR wystąpił).
+\end{itemize}
+
+\subsection{Dane wejściowe}
+W trakcie tworzenia specyfikacji funkcjonalnej źle przewidzieliśmy ilość i rodzaj potrzebnych danych do podania przez użytkownika. Z tego powodu zmianie uległy:
+\begin{itemize}
+    \item dane wejściowe dla wczytania danych z terminala -- a konkretnie zmienna \textit{scope\_of\_scales} tj. przedział wag krawędzi grafu. W końcowej fazie programu przedział wag jest przedstawiony za pomocą dwóch zmiennych \textit{start\_weight} oraz \textit{end\_weight}. Zmienne przyjmują jedynie liczby całkowite. Natomiast wartości losowane w podanym przedziale są liczbami rzeczywstymi.\\ Przedział wartości obu granicy początkowej: $<0, 10000>$, przedział wartości dla granicy końcowej $<1, 10000>$.
+\end{itemize}
+
+
+\section{Wprowadzone zmiany w projekcie dotyczące specyfikacji implementacyjnej}
+\subsection{Moduły}
+
+\subsubsection{Main.c}
+Moduł \texttt{Main.c} nie odpowiada za wywołanie wszystkich funkcji -- za to odpowiada nowy moduł \texttt{run\_program.c}. W module \texttt{Main.c} znajduje się sprawdzenie danych oraz uruchomienie funkcji \texttt{run\_program}.
+
+\subsubsection{help.c}
+Stworzylśmy nowy moduł \texttt{help.c} odpowiadający za uruchomienie informacji na temat działania programu gdy użytkownik uruchomi program z komendą \tesxtit{help} (stworzony w celu zwiększenia przejrzystości kodu).
+
+\subsubsection{graph\_maker.c}
+W module \texttt{graph\_maker} uległa zmianie funkcja \texttt{make\_graph}, do której musieliśmy dodać trzy zmienne: 
+\begin{itemize}
+    \item \textit{int mode} -- tryb uruchomienia programu.
+    \item \textit{int start\_weight} -- początek przedziału wag ścieżek.
+    \item \textit{int end\_weight} -- koniec przedziału wag ścieżek.
+\end{itemize}
+\\\\
+Wygląd funkcji po wprowadzonych zmianach:\\\\
+\texttt{double **make\_graph(int mode, int start\_weight, int end\_weight, int rows, int columns)}
+\\\\
+
+Do funkcji \texttt{draw\_weights} dodaliśmy zmienne:
+\begin{itemize}
+    \item \textit{int start\_weight} oraz \textit{int end\_weight}, których znaczenie zostało wyjaśnione w podpunkcie 2.1.2.
+    \item \textit{int rows} oraz \textit{int columns}, to jest odpowiednio -- liczna rzędów i kolumn. 
+\end{itemize}
+\\\\
+\newpage
+Wygląd funkcji po wprowadzonych zmianach:\\\\
+\texttt{void draw\_weights (double **graph, int start\_weight, int end\_weight, int rows, int columns)}
+\\\\
+
+
+Do funkcji \texttt{draw\_edges} dodaliśmy zmienne:
+\begin{itemize}
+    \item \textit{int chance} która odpowiada za prawdopodobieństwo usunięcia krawędzi z grafu (im zmienna chance jest większa, tym szansa na usunięcie krawędzi mniejsza).
+    \item \textit{int rows} oraz \textit{int columns}, to jest odpowiednio -- liczna rzędów i kolumn. 
+\end{itemize}
+\\\\
+Wygląd funkcji po wprowadzonych zmianach:\\\\
+\texttt{void draw\_edges (double **graph, int rows, int columns, int chance)}
+\\
+\\
+W module znalazły się również funkcje \texttt{malloc\_graph} (funkcja dynamicznie alokująca pamięć na graf) oraz \texttt{free\_graph} (funkcja zwalniająca pamięć zajętą dla grafu).
+
+\subsubsection{BFS.c}
+W module \texttt{BFS.c} do funkcji \texttt{BFS} dodaliśmy dwie zmienne \textit{int rows} oraz \textit{int columns}, któych znaczenie już było wyjaśnione (np. podpunkt 2.1.2). Zmienił się również sposób działania funkcji \texttt{BFS}. W końcowej ostatecznej wersji programu funkcja sprawdza czy dla każdego wierzchołka użytkownik jest w stanie dojść do każdego innego wierzchołka. Początkowo funkcja miała sprawdzać dla jednego, wybranego wierzchołka, czy istnieje droga do każdego innego.
+\\
+W module \texttt{BFS.c} powstały również funkcje obsługujące działanie listy liniowej:
+
+\begin{itemize}
+    \item \textit{static int q\_is\_empty (q\_seat *index)} - funkcja sprawdzająca czy kolejka jest pusta.
+    \item \textit{static void add\_to\_q (q\_seat *head, int vertex)} - funkcja dodająca element do kolejki.
+    \item \textit{static int remove\_from\_q (q\_seat **head\_change, q\_seat *head)} - funkcja usuwająca element z kolejki.
+    \item \textit{static int is\_in\_q (q\_seat *head, int vertex)} - funkcja sprawdzająca czy dany element znajduje się już w kolejce.
+\end{itemize}
+\newpage
+\\Wyjaśnienie podanych zmiennych:
+\begin{itemize}
+    \item \texttt{q\_seat *index} -- miejsce w kolejce  struktura zawierająca dane na temat wierzchołka \textit{index} jaki znajduje się na tym miejscu w kolejce oraz zawierająca wskaźnik na następne miejsce w kolejce.
+    \item \texttt{q\_seat *head} -- pierwsze miejsce w kolejce.
+    \item \texttt{vertex} -- index wierzchołka.
+    \item \texttt{q\_seat **head\_change} -- wartość wskaźnika na pierwsze miejsce w kolejce.
+\end{itemize}
+
+
+
+
+\subsubsection{Dijkstra.c}
+W module \texttt{Dijkstra.c} dodano dwa nowe parametry:
+\begin{itemize}
+\item \textit{int *Rows} -- przekazuje wskaźnik na miejsce w pamięci, w którym zapisana jest liczba rzędów grafu.
+
+\item \textit{int *Columns} -- przekazuje wskaźnik na miejsce w pamięci, w którym zapisana jest liczba kolumn grafu.
+
+\end{itemize}
+Wygląd funkcji po wprowadzonych zmianach:\\\\
+\texttt{void dijkstra(double **graph, int starting\_vertex, int ending\_vertex, char output\_mode, int *Rows, int *Columns)}\\\\
+Poza dodaniem nowych parametrów, algorytm działa w nieznacznie inny sposób, niż zostało to zapisane w specyfikacji implementacyjnej. Następny wierzchołek nie jest wybierany na podstawie najkrótszej ścieżki względem wierzchołka w którym aktualnie się znajdujemy, tylko jest on wybierany w~przypadku znalezienia najkrótszej ścieżki do nieodzwiedzonego wierzchołka, spośród wszystkich odwiedzonych w danym momencie wierzchołków.
+\subsubsection{File\_reader.c}
+W module \texttt{File\_reader.c} dodano dwa nowe parametry:
+\begin{itemize}
+
+\item \textit{int *global\_rows} -- przekazuje wskaźnik na miejsce pamięci, w którym zapisana ma zostać liczba rzędów grafu.
+\item \textit{int *global\_columns} -- przekazuje wskaźnik na miejsce pamięci, w którym zapisana ma zostać liczba kolumn grafu.
+
+Wygląd funkcji po wprowadzonych zmianach:\\\\
+\texttt{double **graph\_from\_file( char *file\_name, int *global\_rows, int *global\_columns )}\\\\
+Dzięki dodaniu tych parametrów w postaci wskaźników, przy wczytywaniu grafu z pliku, liczba rzędów oraz kolumn zostanie zapisana w miejscu pamięci, do którego program ma dostęp z poziomu funkcji \texttt{Main.c}, dzięki czemu liczba rzędów i kolumn może później zostać przekazana do funkcji \texttt{Dijkstra.c}.
+
+\subsubsection{run\_program.c}
+Stworzyliśmy nowy moduł \texttt{run\_program.c}, który odpowiada za użycie wszystkich potrzebnych funkcji oraz wczytanie danych podanych przez użytkownika. \\\\
+Moduł zwiera funkcje:
+\begin{itemize}
+    \item statyczną \textit{static void run\_program\_file(char **user\_input, int number\_of\_arguments)} -- która odpowiada za użycie odpowiednich funkcji potrzebnych do uruchomienia programu wczytując dane na temat grafu z pliku.
+    \item statyczną \textit{static void run\_program\_terminal(char **user\_input, int number\_of\_arguments)} -- która odpowiada za użycie odpowiednich funkcji potrzebnych do uruchomienia programu wczytując dane z~terminala.
+    \item \textit{void run\_program (char **user\_input, int number\_of\_arguments)} -- funkcja główna która odpowiada za uruchomienie dwóch powyższych funkcji statycznych, w zależności od tego który sposób uruchomienia programu zostanie wybrany.
+\end{itemize}
+
+\subsubsection{Makefile}
+Moduł \texttt{Makefile} zwiera dwa testy z trzech przewidywanych w specyfikacji implementacyjnej. Trzeci test, który miał sprawdzać zachowanie programu gdy użytkownik wprowadzi nazwę pliku, który nie istnieje zawiera się w teście ,,test2".
+
+
+\end{itemize}
+
+\subsection{Przykładowe uruchomienie}
+
+1. Przykładowy sposób kompilacji programu #1:\\
+./a.out T 7 8 2 1 1 B 4 5\\
+
+Przykładowe dane wyjściowe:\\(4, 5) : 4 $->$ 5\\
+
+Wyjaśnienie znaczenia danych:
+\begin{itemize}
+    \item \texttt{T} - sposób wczytania danych (T - terminal).
+    \item \texttt{7} - liczba rzędów.
+    \item \texttt{8} - liczba kolumn.
+    \item \texttt{2} - tryb uruchomienia.
+    \item \texttt{1} - pierwszy zakres wag.
+    \item \texttt{1} - drugi zakres wag.
+    \item \texttt{B} - tryb wyświetlania ścieżki (B - Basic).
+    \item \texttt{4} - index pierwszego wierzchołka.
+    \item \texttt{5} - index drugiego wierzchołka.
+\end{itemize}
+
+2. Przykładowy sposób kompilacji programu:\\
+./a.out F generated\_graph E 0 10\\
+
+Przykładowe dane wyjściowe:\\(0, 10) : 0(1.000000) $->$ 1(1.000000) 
+$->$ 2(1.000000) $->$ 10\\
+
+Wyjaśnienie znaczenia danych:
+\begin{itemize}
+    \item \texttt{F} - sposób wczytania danych (F - File).
+    \item \texttt{generated\_graph} - nazwa pliku do wczytania.
+    \item \texttt{E} - tryb wyświetlania ścieżki (E - Extended).
+    \item \texttt{0} - index pierwszego wierzchołka.
+    \item \texttt{10} - index drugiego wierzchołka.
+\end{itemize}
+
+\section{Co można by było zrobić lepiej}
+W czasie projektowanie specyfikacji funkcjonalnej można było lepiej zastanowić się nad funkcjami oraz ich parametrami, ponieważ w trakcie pisania kodu okazało się, że wiele modułów wymagało poprawek. \\W przypadku nauki wykorzystywanych algorytmów warto było skorzystać z~różnych i sprawdzonych źródeł informacji, aby upewnić się, że dobrze zrozumieliśmy działanie algorytmu. \\Można było również poruszyć więcej pozornie oczywistych tematów. Niektóre fragmenty projektu były oczywiste, przez co wydawało się że nie wymagają uzgodnienia. Przy takim projekcie każda różnica w założeniach prowadziła do błędnie napisanego kodu. 
+
+
+
+\end{document}

@@ -1,0 +1,212 @@
+\documentclass[12pt, a4paper]{article}
+\setlength\parindent{0pt}
+\usepackage{polski}
+\usepackage[utf8]{inputenc}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{graphicx}
+\usepackage{smartdiagram}
+\usepackage{graphicx}
+
+\pagestyle{fancy}
+\fancyhf{}
+\cfoot{\thepage\ z \pageref{LastPage}}
+
+\lhead{Specyfikacja implementacyjna \textit{Best path} (C)}
+\rhead{M.Szlązak, M.Kwiatkowski}
+
+
+\begin{document}
+\title{Specyfikacja implementacyjna programu\\ \textit{Best path} (C)}
+\date{15.03.2022}
+\author{Michał Szlązak, Maciek Kwiatkowski}
+\maketitle
+\tableofcontents
+\thispagestyle{empty}
+\cleardoublepage
+
+\newpage
+
+\setcounter{page}{1}
+
+\section{Cel Projektu}
+Celem projektu \textit{Best path} jest stworzenie programu który będzie w stanie znaleźć najkrótszą ścieżkę pomiędzy dwoma wybranymi wierzchołkami grafu. Program umożliwi również wczytanie własnego grafu z pliku, wygenerowanie grafu, wyeksportowanie grafu do pliku i wiele innych. Bardziej szczegółowe wyjaśnienie jakie funkcje będzie spełniał program, co będzie umożliwiał, jak wygląda graf czy przykładowy plik do wczytania -- można znaleźć w~\texttt{Specyfikacji funkcjonalnej Best path.png}.
+
+
+
+\section{Wymagania funkcjonalne}
+Program powinien:
+\begin{itemize}
+\item umożliwić użytkownikowi:
+    \begin{itemize}
+        \item Wybór czy użytkownik chce wygenerować graf czy wczytać go z~pliku.
+        \item Podanie nazwy pliku z grafem, który ma być wczytany.
+        \item Wybór rozmiaru grafu, gdy jest on generowany przez program.
+        \item Wybór zakresu wag krawędzi, gdy graf jest generowany przez program.
+        \item Wybór jednego z trzech trybów działania programu, gdy graf jest generowany przez przez program:
+        \begin{itemize}
+            \item \texttt{Tryb 1}: wszystkie krawędzie między wierzchołkami istnieją, wygenerowane będą losowe wagi z wczytanego zakresu.
+        	\item \texttt{Tryb 2}: losujemy czy istnieją krawędzie między wierzchołkami do momentu aż powstanie graf spójny (graf jest spójny gdy dla każdego wierzchołka możemy znaleźć drogę). Losujemy wagi z~wczytanego zakresu.
+        	\item \texttt{Tryb 3}: losujemy czy istnieją krawędzie między wierzchołkami, natomiast graf nie musi być spójny. Losujemy wagi z wczytanego zakresu.
+        \end{itemize}
+        \item Wybór jednego z dwóch trybów wyświetlania:
+        \begin{itemize}
+            \item \texttt{Basic: }Wyświetlanie jedynie indeksów wierzchołków przez które przechodzi najkrótsza ścieżka. Przykład wyświetlenia najkrótszej ścieżki z wierzchołka 1 do wierzchołka 3:\\ \texttt{(1, 3) : 1 -> 5 -> 6 -> 7 -> 3}.
+            \item \texttt{Extended: }Wyświetlanie indeksów wierzchołków oraz wag krawędzi, przez które przechodzi najkrótsza ścieżka. Przykład wyświetlenia najkrótszej ścieżki z wierzchołka 1 do wierzchołka 3:\\ \texttt{(1, 3) : 1(0.4) -> 5(3.5) -> 6(12) -> 7(8) -> 3}.
+        \end{itemize}
+        \item Wybór dowolnej ilości par wierzchołków dla których program znajdzie najkrótszą ścieżkę.
+        \item Umożliwić wyświetlenie instrukcji za pomocą komendy \texttt{help}.
+    \end{itemize}
+    \item Sprawdzić wczytane dane.
+    \item Sprawdzić spójność grafu (przy wybraniu trybu trzeciego program powinien wyświetlić Error w przypadku gdy użytkownik chce znaleźć ścieżkę pomiędzy wierzchołkami pomiędzy którymi tej ścieżki nie ma).
+    \item Znaleźć najkrótszą ścieżkę pomiędzy wybranymi wierzchołkami (o ile taka istnieje).
+    \item Wyświetlić odpowiednie komunikaty w wyniku podania złych danych.
+    \item Zapisze wygenerowany przez program graf do pliku o nazwie \texttt{generated\_graph} i będzie go nadpisywał przy każdym kolejnym generowaniu grafu.
+\end{itemize}
+
+\section{Wymagania niefunkcjonalne}
+\begin{itemize}
+    \item Program powinien wykryć każdy błąd, który mógłby spowodować niepoprawne działanie programu -- tj. powinien być odporny na błędy ze strony użytkowika.
+    \item Program powinien być prosty i jednoznaczny w obsłudze -- komenda \texttt{help} powinna w nieskomplikowany sposób wytłumaczyć do czego służy aplikacja i w jaki sposób posługiwać się komendami.
+    \item Program tworzony była na wersji Ubuntu 20.04 dlatego zalecanym jest uruchamianie go na tej właśnie wersji, bądź nowszej. W przypadku starszych wersji może wystąpić problem podczas uruchamiania aplikacji. \newpage
+    \item W podpunkcie \textit{wymagania środowiskowe} podana została wersja GCC, w której kompilowany był nasz program. Nie jest ona najnowsza, dlatego zapewne większość użytkowników dysponuje bardziej aktualnymi wersjami, jednakże w przypadku problemów z kompilacją, zalecanym jest zaaktualizowanie GCC na sprzęcie, na którym przeprowadzane będą testy.
+\end{itemize}
+
+\section{Diagram modułów}
+
+\begin{center}
+\includegraphics[width=1.1\textwidth]{Diagram modułów JIMP2.png}
+\caption{\textit{rys. 1 -- diagram modułów} \label{overflow}}
+\end{center}
+
+\textit{Rysunek 1} przedstawia w jakich modułach będą używane funkcje z innych modułów. Przedstawia w jaki sposób został podzielony program, na jakie części i w jaki sposób te części są ze sobą powiązane.\\
+
+\textbf{Opis diagramu:}
+
+\begin{itemize}
+    \item Plik \texttt{a.out} to plik, który umożliwia uruchomienie całego programu.
+    \item Pliki z rozszerzeniem \texttt{.h} to pliki nagłówkowe, które zawierają definicje funkcji plików źródłówych o rozszerzeniu \texttt{.c}. \newpage
+    \item Moduł \texttt{Main.c} to jest moduł główny, który odpowiada za wczytanie danych podanych przez użytkownika. Sprawdza ich poprawność, w razie potrzeby wyświetla potrzebne komunikaty. Następnie przekazuje wczytane dane innym funkcjom z innych modułów.
+    \item Moduł \texttt{File\_reader.c} (gdy użytkownik postawnowi wczytać graf z~pliku) odpowiada za sprawdzenie poprawności formatu danych pliku. Jeżeli format jest poprawny wczyta dane, stworzy graf i~zwróci go do głównego modułu.
+    \item Moduł \texttt{Graph\_maker.c} odpowiada za stworzenie grafu zgodnie z danymi podanymi przez użytkownika i zwrócenie go do modułu głównego (gdy użytkownik chce wygenerować graf podając dane do terminala).
+    \item Moduł \texttt{File\_maker.c} (jeżeli użytkownik chce wygenerować graf podając dane do terminala) odpowiada za stworzenie pliku o nazwie \textit{generated\_graph} (o ile nie został stworzony wcześniej) i zapisanie w nim danych dotyczących grafu zgodnie z ustalonym formatem. Jeżeli w pliku znajdują się dane z poprzednich kompilacji programu, poprzednie dane z pliku zostaną zastąpione nowymi (zostaną nadpisane).
+    \item Moduł \texttt{BFS.c} odpowiada za sprawdzenie czy graf jest spójny -- czy do każdego wierzchołka z dowolnego innego wierzchołka znajdzie się ścieżka.
+    \item Moduł \texttt{Dijkstra.c} opowiada za znalezienie najkrótszej ścieżki dla podanych wierzchołków, zwrócenie tej ścieżki bądź poinformowanie jeżeli taka ścieżka nie istnieje.
+\end{itemize}
+
+
+
+\section{Opis modułów i ich funkcji}
+\subsection{Main.c}
+W module \texttt{main.c} będzie główna część programu -- w nim wywoływane będą funkcje z pozostałych modułów. Odpowiada on również za wczytanie danych, które poda użytkownik sprawdzenie ich poprawności i wyświetlenie odpowiednich komunikatów.\\
+
+Główna funkcja \texttt{main.c}: \texttt{int main (int argc, char **argv)}\\
+Zmienna \texttt{argc} przechowuje wartość opowiadającą liczbie danych podanych w terminalu, zmienna \texttt{**argv} przechowuje podane dane.\\
+
+Funkcja \texttt{main.c} przyjmuje dane według formatu:
+\begin{itemize}
+\item Format wywołania, gdy dane dotyczące grafu podajemy z pliku: \texttt{./a.out} \textit{insert\_mode} \textit{file\_name} \textit{output\_mode} \textit{starting\_vertex} \textit{ending\_vertex} (-- i~dowolnie więcej szukanych par wierzchołków).
+\item Format wywołania, gdy wszytskie dane podajemy przez terminal: \texttt{./a.out} \textit{insert\_mode} \textit{number\_of\_rows} \textit{number\_of\_columns} \textit{mode} \textit{scope\_of\_scales} \textit{output\_mode} \textit{starting\_vertex} \textit{ending\_vertex} (-- i~dowolnie więcej szukanych par wierzchołków).
+\end{itemize}
+
+\textbf{\textit{insert\_mode}}: Przyjmuje dane: \texttt{F} (File) i \texttt{T} (Terminal).\\
+
+\textbf{\textit{file\_name}}: Jest to nazwa pliku do odczytu. Przyjmuje nazwę pliku tekstowego. Nazwa pliku może składać się z maksymalnie 28 znaków.\\
+
+\textbf{\textit{number\_of\_rows}}: Przyjmuje wartości od 2 do 1000.\\
+
+\textbf{\textit{number\_of\_columns}}: Przyjmuje wartości 2 do 1000.\\
+
+\textbf{\textit{mode}}: Przyjmuje wartości \texttt{1}, \texttt{2} lub \texttt{3}.\\
+
+\textbf{\textit{scope\_of\_scales}}: Przyjmuje wartości od 0 do 1000.\\
+
+\textbf{\textit{output\_mode}}: Przyjmuje wartości \texttt{B} (Basic) i \texttt{E} (Extended)\\
+
+\textbf{\textit{starting\_vertex}}: Przyjmuje wartości od 0 do n-1 (gdzie n to liczba wierzchołków).\\
+
+\textbf{\textit{ending\_vertex}}: Przyjmuje wartości od 0 do n-1 (gdzie n to liczba wierzchołków).\\\\
+
+\subsection{Graph\_maker.c}\\\\
+Moduł \texttt{Graph\_maker.c} będzie zawierał funkcje pozwalające stworzyć graf według danych podanych przez użytkownika w module \texttt{Main.c}. Do tego będzie potrzebował funkcji:
+\begin{itemize}
+    \item \texttt{double **make\_graph (int columns, int rows)} -- która pozwoli mu zaalokować pamięć dla grafu. Zmienne \texttt{columns} i \texttt{rows} przyjmują wartości $<2,1000>$.
+    \item \texttt{void draw\_weights (double **graph)} -- która będzie losowała wagi dla każdej krawędzi.
+    \item \texttt{void draw\_edges (double **graph)} -- która będzie losowała istnienie krawędzi (nieistniejące krawędzie będą miały wartość -1).
+    \item \texttt{int BFS (double **graph)} -- która pozwoli stwierdzić spójność grafu. Zwraca: wartości \texttt{0} -- gdy graf jest spójny, \texttt{1} -- gdy graf jest niespójny.
+\end{itemize}
+
+
+
+\subsection{File\_reader.c}
+Moduł \texttt{File\_reader.c} będzie zawierał funkcję czytającą plik z grafem podanym przez użytkownika oraz będzie zawierał funkcję sprawdzającą format danych podanego pliku. Moduł będzie również zawierać pomniejsze funkcje umożliwiające: alokowanie pamięci dla grafu, uwalnianie zaalokowanej pamięci itp.\\
+\begin{itemize}
+    \item \texttt{int check\_file\_format (char *file\_name)} -- funkcja sprawdzająca format danych. Zwraca: \texttt{0} -- gdy format jest poprawny, \texttt{1} -- gdy format jest niepoprawny (int).
+    \item \texttt{double **graph\_from\_file (char *file\_name)} -- Funkcja czytająca dane z pliku. Zwraca: wskaźnik na stworzony graf (wskaźnik na zaalokowaną pamięć).
+
+\end{itemize}
+
+
+\subsection{BFS.c}
+Moduł \texttt{BFS.c} będzie zawierał funkcję \texttt{bfs}, która odpowiada za sprawdzanie spójności grafu.\\\\
+\texttt{Działanie algorytmu BFS:}\\
+Dla wybranego pierwszego wierzchołka grafu (będzie to pierwszy wierzchołek -- indeks: 0) będzie szukał połączenia z najbliższymi wierzchołkami (najbliższy wierzchołek -- taki od którego dzieli tylko jedna krawędź) i dodawał je do kolejki ,,queue". Wierzchołek dla którego znaleziono już wszystkie najbliższe połączenia trafia na listę ,,visited" (tj. odwiedzone -- takie do których da się dotrzeć). Następnie zostaje usunięty z kolejki ,,queue". Dla każdego następnego wierzchołka w kolejce wyszukuje wszystkie najbliższe połączenia z innymi wierzchołkami, dodaje te wierzchołki do kolejki (o ile jeszcze ich tam nie ma). Gdy już wszystkie najbliższe połączenia dla następnego wierzchołka zostały znalezione i dodane do kolejki, dodaje ten wierzchołek do listy ,,visited", usuwa z kolejki ,,queue", powtarza te czynności aż kolejka ,,queue" będzie pusta. Jeżeli na liście ,,visited" znalazły się wszystkie wierzchołki -- to oznacza, że graf jest spójny.
+\\\\
+Funkcja \texttt{bfs}: \texttt{int bfs (double **graph)}. Zwraca wartości \texttt{0} -- gdy graf jest spójny, \texttt{1} -- gdy graf nie jest spójny.
+
+\subsection{Dijkstra.c}
+Moduł \texttt{Dijkstra.c} będzie zawierał jedną funkcję \texttt{void dijkstra (double **graph, int starting\_vertex, int ending\_vertex, int output\_mode)}, która przyjmować będzie:\\\\
+
+Następnie za pomocą algorytmu Dijkstry funkcja znajdzie najkrótszą ścieżkę między danymi wierzchołkami (int starting\_vertex -- wierzchołek początkowy, int ending\_vertex -- wierzchołek końcowy). Wyświetli ją w terminalu według wybranego trybu (output\_mode -- tryb wyświetlania). Operacja ta będzie wykonywana dla każdej pary wierzchołków, dzięki czemu wszystkie szukane ścięzki zostaną wypisane w termianlu.\\W celu przeprowadzenie szukania najkrótszej ścieżki za pomocą algorytmu Dijkstry, utworzone zostaną 3 nowe tablice \texttt{visted[n], path[n], prev[n]} gdzie \texttt{n} to liczba wierzchołków. Tablica \texttt{visited[n]} -- zawiera informację, czy \texttt{n}--ty wierzchołek został odwiedzony (początkowo dla każdego wierzchołka wartość w tej tablicy wynosić będzie 0 "not visited", co oznacza, że dany wierzchołek nie został odwiedzony, natomiast w przypadku gdy już go odwiedzimy, to wartość ta zostanie zmieniona na 1 "visited"). Tablica \texttt{path[n]} zawierać będzie wartość najkrótszej ścieżki z wierzchołka początkowego do \texttt{n}-tego wierzchołka, jaką na dany moment udało się wyznaczyć (wraz z wykonywaniem algorytmu wartość ta może się zmieniać), na początku wartość ta wynosić będzie -1 dla każdego wierzchołka. Tablica \texttt{prev[n]} będzie zawierać numer wierzchołka, który jest poprzednikiem wierzchołka, w którym aktualnie się znajdujemy. Początkowo wartość ta wynosi -1.\\\\
+
+
+
+Działanie algorytmu Dijkstry w funkcji \texttt{dijkstra}:\\\\
+
+Po wybraniu wierzchołka początkowego jego wartość \texttt{visited[starting\_vertex} zostanie zmieniona na 1, \texttt{path[starting\_vertex]} przyjmie wartość 0, ponieważ droga jakiegokolwiek wierzchołka do samego siebie wynosi 0, a \texttt{prev[starting\_vertex]} przyjmie wartość numeru tego wierzchołka.\\\\ Następnie sprawdzana jest wartość wag sąsiadującyh wierzchołków. Jeżeli wartość \texttt{path[n]} sąsiadującego wierzchołka w danym momencie wynosi -1, to jest ona zmieniana na wartość \texttt{path[n]} wierzchołka, którego aktualnie odwiedzamy plus wartość wagi połączenia między sąsiadującymi wierzchołkami. \texttt{Prev[n]} sąsiadującego wierzchołka przyjmuje wartość numeru wierzchołka w~którym obecnie się znajdujemy. \\\\W przypadku gdy wartość w polu \texttt{path[n]} nie wynosi już -1, to musimy porównać wartość nowej ścieżki z tą, która obecnie znajduje się w polu \texttt{path[n]} sąsiedniego wierzchołka, jeżeli nowa ścieżka okaże się krótsza, to musi ona zastąpić wcześniejszą wartość, oraz w \texttt{prev[n]} musi zostać podany numer wierzchołka, w którym aktualnie się znajdujemy.\\\\ Po wykonaniu tych operacji, sprawdzamy która waga ścieżki do sąsiadującego wierzchołka jest najmniejsza i przechodzimy do niego, ale tylko pod warunkiem, że nie został on już wcześniej odwiedzony, w takim przypadku, szukamy ścieżki o najmniejszej wadze spośród nieodwiedzonych wierzchołków. Czynność tą powtarzamy do momentu, gdy wszystkie wierzchołki zostaną odwiedzone, czyli wartość \texttt{visited[n]} dla każdego wierzchołka będzie wynosić 1. Dzięki temu będziemy posiadać wszystkie potrzebne informacje do wyznaczenia najkrótszej ścieżki między wybranymi wierzchołkami, która następnie zostanie wypisana w terminalu.
+
+
+\subsection{File\_maker.c}
+Moduł \texttt{File\_maker.c} odpowiada za stworzenie pliku z wygenerowanym grafem. Będzie zawierał funkcję \texttt{file\_maker}, która stworzy taki plik. Plik będzie miał z góry ustaloną nazwę \texttt{generated\_graph} i będzie nadpisywany przy każdym kolejnym uruchomieniu programu.
+\\\\
+Funkcja \texttt{file\_maker}: \texttt{void file\_maker (char **graph)} -- nie zwraca wartości, tworzy plik.
+
+
+\subsection{Makefile}
+Moduł \texttt{Makefile} nie zawiera żadnych funkcji, natomiast odpowiada za umożliwienie użytkownikowi szybkiej kompilacji wszystkich modułów za pomocą komendy \texttt{make}. Komenda ta stworzy plik \texttt{a.out} gotowy do użycia. Makefile będzie zawierał również gotowe testy przy których nie trzeba będzie podawać żadnych danych. Dane program pobierze z przygotowanego pliku. Testy będzie można uruchomić za pomocą komendy \texttt{make test(num)} -- gdzie \texttt{num} to numer testu. Za pomocą tych komend w sposób automatyczny przedstawione zostanie prawidłowe działanie różnych funkcji programu. Po wpisaniu ich w terminalu zostanie uruchomiony program, który powinien spowodować wyświetlenie komunikatu o błędzie (dane wejściowe z którymi program został uruchomiony zostaną wcześniej wyświetlone na ekranie), następnie zostanie on wytłumaczony i przedstawione zostaną zmiany, dla których program zadziałałby prawidłowo. Przykładowy test poprawnego działania komunikatu o błędach prezentować się będzie następująco:\\\\
+\texttt{./a.out G 7 8 3 1 3 4 5}\\
+\texttt{Error: Incorrect data - insert mode, use "help" for more information.}\\\\
+\texttt{Zwrócony został Error, ponieważ użytkownik podał jako pierwszą zmienną
+G. Jest to zmienna insert mode, która przyjmuje wartości T (od Terminal)
+i F (od File).}\\\\
+\texttt{Przykład poprawnie wprowadzonych danych: ./a.out T 7 8 3 1 3 4 5}\\
+
+\texttt{Makefile} będzie zawierał również komendę \texttt{make help}, która wyświetli wszystkie możliwe komendy oraz wyjaśni ich działanie.
+
+
+\section{Przeprowadzanie testów}
+Testy będą automatyczne, przeprowadzane za pomocą Makefile. Przygotowane zostaną gotowe pliki z danymi które będą sprawdzały działnie różnych części programu. Testy będzie można uruchomić za pomocą komendy \texttt{make test(num)} gdzie \texttt{num} -- numer testu. Rodzaje testów:
+\begin{itemize}
+    \item \textit{make test1} -- Wykrywanie błędów we wczytanych danych.
+    \item \textit{make test2} -- Wykrywanie błędów w formacie pliku do wczytania.
+    \item \textit{make test3} -- Zatrzymanie programu gdy podany plik do wczytania nie będzie istniał.
+    
+\end{itemize}
+
+
+\section{Wybrane środowisko}
+Środowisko jakie zostanie wykorzystane w trakcie pracy nad projektem to GIT. Biorąc pod uwagę, że pracujemy w grupie potrzebujemy środowiska, które umożliwi nam łatwe i bezpieczne rozgałęzienie pracy -- dlatego wybraliśmy GIT'a.\\\\
+
+Używane środowiska:\\
+OS: Ubuntu 20.04\\
+GCC version: (Ubuntu 9.3.0-17ubuntu1~20.04) 9.3.0\\
+Editor: VIM\\\\
+Parametry komputera:\\
+CPU: Intel(R) Core(TM) i7-8750H CPU @ 2.20GHz   2.20 GHz\\
+RAM: 2 x 8 DDR4, 8 GB, 2666 MHz
+
+\section{Konwencja wprowadzania zmian}
+Pomimo, że projekt nad którym pracujemy nie jest bardzo skomplikowany i~nie powinien być znacząco rozbudowany, każda osoba pracująca nad projektem będzie pracowała na własnej gałęzi, dopiero po sprawdzeniu działania wprowadzonych zmian, zmiany zostaną wprowadzone do gałęzi głównej. W~przypadku takiego projektu tworzenie dodatkowych gałęzi jest niepotrzebne i na tym poziomie wystarczy ograniczenie się do~gałęzi \texttt{Master}. Każda zmiana będzie przejrzyście zakomentowana. W przypadku wprowadzania dużej ilości zmian będą stosowane tagi (Np.: v1, v1 itp.).
+ 
+\end{document}
+

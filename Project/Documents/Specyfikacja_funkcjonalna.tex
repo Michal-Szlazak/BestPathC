@@ -1,0 +1,198 @@
+\documentclass[12pt, a4paper]{article}
+\setlength\parindent{0pt}
+\usepackage{polski}
+\usepackage[utf8]{inputenc}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{graphicx}
+\pagestyle{fancy}
+\fancyhf{}
+\cfoot{\thepage\ z \pageref{LastPage}}
+
+\lhead{Specyfikacja funkcjonalna \textit{Best path}}
+\rhead{M.Szlązak, M.Kwiatkowski}
+
+
+\begin{document}
+\title{Specyfikacja funkcjonalna programu \\ ``Best path"}
+\date{05.03.2022}
+\author{Michał Szlązak, Maciek Kwiatkowski}
+\maketitle
+\tableofcontents
+\thispagestyle{empty}
+\cleardoublepage
+
+\newpage
+\setcounter{page}{1}
+
+\section{Cel Projektu}
+
+Celem projektu jest stworzenie programu który będzie wykonywał operacje na grafie:
+
+\begin{itemize}
+\item Umożliwi wygenerowanie grafu o wymiarach podanych przez użytkownika. Wymiary są postaci \texttt{A x B}, gdzie $2 \leq \texttt{A, B} \leq 1000$.
+\item Umożliwi użytkownikowi podać zakres wag krawędzi pomiędzy wierzchołkami. Zakres musi być dodatni, nie większy od 100. Program przyjmuje liczby rzeczywiste (Np.: $<0, 99.25>$). 
+\item Program wylosuje wagi w zakresie podanym przez użytkownika.
+\item Umożliwi wczytanie grafu z pliku o odpowiednim formacie (Format podany jest w podpunkcie ``2 Problem").
+\item Znajdzie najkrótsze ścieżki pomiędzy wybranymi parami wierzchołków (wybranych przez użytkownika -- użytkownik może podać wiele par, muszą zawierać się w rozmiarze grafu) za pomocą algorytmu Dijkstry.
+\item Program będzie można uruchomić w trzech trybach:
+\begin{itemize}
+    \item \texttt{Tryb 1}: wszystkie krawędzie między wierzchołkami istnieją, 		wygenerowane będą losowe wagi z wczytanego zakresu.
+	\item \texttt{Tryb 2}: losujemy czy istnieją krawędzie między wierzchołkami do momentu aż powstanie graf spójny (graf spójny – gdy dla każdego wierzchołka możemy znaleźć drogę), losujemy również wagi z~wczytanego zakresu.
+	\item \texttt{Tryb 3}: losujemy czy istnieją krawędzie między wierzchołkami (graf nie musi być spójny), losujemy wagi z wczytanego zakresu.
+\end{itemize}
+
+\item program będzie w stanie stwierdzić spójność grafu ( za pomocą algorytmu BSF).
+
+\item program będzie zapisywał wygenerowany graf do pliku o nazwie\\``\texttt{generated\_graph}" i będzie go nadpisywał przy każdym kolejnym uruchomieniu programu.
+
+\newpage
+\item program będzie wyświetlał najkrótszą ścieżkę według określonego trybu:
+\begin{itemize}
+    \item \texttt{Tryb podstawowy}: wyświetla indeksy wierzchołków: początkowego, końcowego i tych które znajdują się na najkrótszej ścieżce.\\ Np.: \texttt{(1, 3) : 1 -> 5 -> 6 -> 7 -> 3}.
+    \item \texttt{Tryb rozszerzony}: Wyświetla te informacje co tryb pierwszy oraz wagę krawędzi pomiędzy wierzchołkami należącymi do najkrótszej ścieżki. \\Np.:\texttt{(1, 3) : 1(0.4) -> 5(3.5) -> 6(12) -> 7(8) -> 3}.
+\end{itemize}
+
+\end{itemize}
+
+
+\section{Problem}
+Program będzie miał za zadanie sprawdzić spójność grafu oraz znaleźć najkrótszą ścieżkę między podanymi wierzchołkami. Graf będzie miał wygląd siatki złożonej z wierzchołków o określonej ilości rzędów i kolumn, które będą wczytane z pliku tekstowego, bądź wpisane przez użytkownika w terminalu. Sąsiednie wierzchołki (tj. ponad, poniżej, obok - nie na ukos) są połączone krawędziami o losowych wagach (mieszczących się w wybranym dodatnim zakresie). W celu sprawdzenia spójności grafu w programie zastosowany będzie algorytm BFS (graf spójny - taki, w którym do każdego wierzchołka znajdzie się droga), natomiast w celu znalezienia najkrótszych ścieżek między wierzchołkami wykorzystany zostanie alogytm Dijkstry, który pozwala znaleźć najkrótszą ścieżkę z wybranego wierzchołka, do każdego innego wierzchołka w grafie.\\
+\newpage
+Przykładowe dane podane z pliku o odpowiednim formacie oraz graf utworzony na ich podstawie:\\\\
+\texttt{3 3}\\
+\texttt{1 :0.575  3 :0.676}\\
+\texttt{0 :0.676  4 :0.676}\\
+\texttt{1 :0.800  5 :0.799}\\
+\texttt{0 :0.189  4 :0.129  6 :0.839}\\
+\texttt{5 :0.355}\\
+\texttt{8 :0.200}\\
+\texttt{3 :0.491}\\
+\texttt{6 :0.078  4 :0.111 8 :0.173}\\
+\texttt{5 :0.399  7 :0.997}\\
+
+     
+
+
+\begin{center}
+\includegraphics[width=1.1\textwidth]{graf2.PNG}
+\end{center}
+
+\section{Struktura katalogów}
+
+\begin{itemize}
+\item Project (folder przechowujący wszystkie pliki potrzebne do uruchomienia programu).
+\item Project/Files (folder przechowujący pliki do odczytu, oraz pliki zapisane przez program).
+\item Project/Modules (folder przechowujący pliki źródłowe oraz pliki nagłówkowe modułów).
+\end{itemize}
+
+
+\section{Dane wejściowe przyjmowane przez program}
+
+\begin{itemize}
+\item format wywołania, gdy dane dotyczące grafu podajemy z pliku: \texttt{./a.out} \textit{insert\_mode} \textit{file\_name} \textit{mode} \textit{scope\_of\_scales} \textit{output\_mode} \textit{starting\_vertex} \textit{ending\_vertex} (- i dowolnie więcej szukanych par wierzchołków).
+\item format wywołania, gdy wszytskie dane podajemy przez terminal: \texttt{./a.out} \textit{insert\_mode} \textit{number\_of\_rows} \textit{number\_of\_columns} \textit{mode} \textit{scope\_of\_scales} \textit{output\_mode} \textit{starting\_vertex} \textit{ending\_vertex} (-- i dowolnie więcej szukanych par wierzchołków).
+\item komenda \texttt{./a.out help} (wypisze instrukcje jak korzystać z programu, jak go wywoływać).
+\item komenda \texttt{make}, która skompiluje wszystkie potrzebne pliki i stworzy plik a.out.
+\item komenda \texttt{make test}, która umożliwi wykonanie przygotowanego testu, bez potrzeby wprowadzania danych.
+\end{itemize}
+
+\textbf{\textit{insert\_mode}}: Decyduje o tym w jaki sposób wczytywane będą dane tworzące graf. Przyjmuje znaki \texttt{F} lub \texttt{T}. Jeżeli podany znak to \texttt{F}, to jest to informacja dla programu, że dane będą wczytywane z pliku, natomiast dla znaku \texttt{T}, program wykonywać się będzie w trybie odczytu z terminala.\\
+
+\textbf{\textit{file\_name}}: Jest to nazwa pliku do odczytu. Przyjmuje pliki tekstowe o rozszerzeniu o odpowiednim formacie. Nazwa pliku może składać się z 28 znaków.\\
+
+\textbf{\textit{number\_of\_rows}}: Liczba wierszy grafu. Przyjmuje wartości 2 -- 1000.\\
+
+\textbf{\textit{number\_of\_columns}}: Liczba kolumn grafu. Przyjmuje wartości 2 -- 1000.\\
+
+\textbf{\textit{mode}}: Decyduje o tym w jakim trybie uruchamiamy nasz program. Przyjmuje znaki \texttt{1} lub \texttt{2} lub \texttt{3}. Dla \texttt{1}  wszystkie krawędzie między wierzhołkami istnieją, wygenerowane będą losowe wagi z wczytanego zakresu. Dla \texttt{2} losujemy czy istnieją krawędzie między wierzchołkami do momentu aż powstanie graf spójny (graf jest spójny – gdy dla każdego wierzchołka możemy znaleźć drogę), losujemy również wagi z wczytanego zakresu. Dla \texttt{3} losujemy czy istnieją krawędzie między wierzchołkami (graf nie musi być spójny), losujemy wagi z wczytanego zakresu.\\
+
+\textbf{\textit{scope\_of\_scales}}: Zakres wag jakie mogą przyjmować ścieżki między wierzchołkami.\\
+
+\textbf{\textit{output\_mode}}: Pozwala wybrać tryb wyświetlania wyników. Przyjmuje wartości: \texttt{B} -- dla wyświetlania podstawowego (Basic), \texttt{E} -- dla wyświetlania rozszerzonego (Extended).\\
+
+\textbf{\textit{starting\_vertex}}: Numer wierczhołka początkowego od którego będziemy szukać najkrótszej ścieżki do wierzchołka końcowego.\\
+
+\textbf{\textit{ending\_vertex}}: Numer wierzchołka końcowego.\\
+
+
+\section{Dane wyjściowe}
+Wyświetlanie poprawnie znalezionej ścieżki: \textbf{(starting\_vertex, ending\_vertex) : path}\\\\
+Np.: \texttt{(7,8) : 7 -> 5 -> 6 -> 8}\\
+
+\textbf{path}: Jest to wypisana najkrótsza ścieżka między początkowym a końcowym wierzchołkiem, która zawiera wszystkie wierzchołki napotkane na tej ścieżce, a każde przejście do kolejnego wierzchołka oznaczone jest strzałką.
+\newpage
+\section*{Komunikaty o błędach}
+\begin{itemize}
+\item \texttt{Error: Incorrect data \-- [nazwa zmiennej], use ``{help}" for more information.}\\\\
+Błąd ten inforumje użytkownika o błędnym typie danych podanym do pararametrów oraz podaje nazwy parametrów, w których błąd ten wystąpił.\\\\
+(Np.: \texttt{Error: Incorrect data \–- scope\_of\_scales, use ``help" for more information.})
+
+
+\item \texttt{Error: Too little data was provided.}\\\\
+Błąd ten inforumuje, że podana została zbyt mała ilość danych.
+\item \texttt{Error: Problem occurred while opening given file.}\\\\
+Błąd ten informuje, że wystąpił problem podczas otwierania pliku.
+\item \texttt{Error: Given file has a wrong format.}\\\\
+Błąd ten informuje, że podany plik ma nieodpowiedni format danych.
+\item \texttt{Error: There is no path for the given pair of vertexes.}\\\\
+Błąd ten informuje, że dla podanej pary wierchołków grafu, nie można znaleźć łączącej ich ścieżki.
+
+\end{itemize}
+
+
+\section{Przykładowe użycie}
+
+Pozytywny wynik:\\
+In: \\
+\texttt{./a.out F mygraph 2 0 1 B 1 3 4 5}\\\\
+Out:\\
+\texttt{(1, 3) : 1 -> 5 -> 6 -> 7 -> 3}\\
+\texttt{(4, 5) : 4 -> 8 -> 9 -> 5}
+\\\\
+\textbf{Wyjaśnienie:}
+\begin{itemize}
+    \item Napis \textbf{./a.out} odpowiada za uruchomienie programu.
+    \item Znak \textbf{F} odpowiada za wybór wczytania danych dotyczących grafu z~pliku (File).
+    \item Napis \textbf{mygraph} to podana nazwa pliku do wczytania.
+    \item Liczba \textbf{2} odpowiada za wybór trybu działania programu (podpunkt czwarty).
+    \item liczby \textbf{0 i 1} odpowiadają za zakres wag krawędzi $<0, 1>$.
+    \item Znak \textbf{B} odpowiada za wybór trybu wyświetlania (\textbf{output\_mode}).
+    \item Liczby \textbf{1, 3, 4 i 5} to są indeksy dwóch par wierzchołków dla których program znajdzie najkrótszą ścieżkę. Są to kolejno początkowy i~końcowy wierzchołek dla pierwszej pary: (1, 3) i dla drugiej: (4, 5).
+\end{itemize}
+\\
+
+Negatwny wynik:\\ 
+In:\\
+\texttt{./a.out G 7 8 3 1 3 4 5}\\
+Out:\\
+\texttt{Error: Incorrect data - insert\_mode, use "help" for more information.}\\\\
+\textbf{Wyjaśnienie:}\\
+Zwrócony został Error, ponieważ użytkownik podał jako pierwszą zmienną \textbf{G}. Jest to zmienna \textbf{insert\_mode}, która przyjmuje wartości \textbf{T} (od Terminal) i \textbf{F} (od File). 
+
+
+\section{Co program testuje}
+\begin{itemize}
+    \item testuje poprawność formatu wpisanego tekstu (format jest podany w~podpunkcie ``Dane wejściowe").
+    \item sprawdza czy podany plik jest w odpowiednim formacie - w czasie testu sprawdzone zostaną: podany rozmiar, poprawność podanych wag, ilość podanych wartości (musi odpowiadać ilości wierzchołków).
+\end{itemize}
+
+
+\end{document}
+
+/*
+ - (ZROBIONE)wyróżnienie wszystkich parametrów
+ - (ZROBIONE)określenie przedziałów wartości
+ - (ZROBIONE)interpunkcja
+ - (ZROBIONE) nr strony/ilosc stron
+ - (ZROBIONE) nagłówki + nazwa
+ - (ZROBIONE)minusy na myślniki
+ - (ZROBIONE)bez cudzysłowia a.out
+ - wczytywanie opisać dokładniej
+ - (ZROBIONE)wierzchołek zamiast węzeł
+ - (ZROBIONE)wyjaśnić komunikaty
+ - (ZROBIONE)oznaczenia zmiennych w przykładowym użyciu i jaki był błąd w złym użyciu
+ - twarda spacja
+ - (ZROBIONE)podać przykładowy plik i graf tak żeby dane w pliku wyjaśniały dane na grafie
+ - (ZROBIONE)2 tryby wyświetlania
+ */
