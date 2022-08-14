@@ -1,11 +1,14 @@
-compile: main.o BFS.o graph_maker.o file_maker.o File_reader.o check_input.o Dijkstra.o help.o run_program.o
-	$(CC) main.o BFS.o graph_maker.o file_maker.o File_reader.o check_input.o Dijkstra.o help.o run_program.o
+compile: main.o BFS.o graph_maker.o file_maker.o File_reader.o check_input.o Dijkstra.o help.o run_program.o check_file_format.o write_error.o
+	$(CC) main.o BFS.o graph_maker.o file_maker.o File_reader.o check_input.o Dijkstra.o help.o run_program.o check_file_format.o write_error.o
 
 debug: a.out
-	$(CC) -g Modules/main.c Modules/BFS.c Modules/graph_maker.c Modules/file_maker.c Modules/File_reader.c Modules/check_input.c Modules/Dijkstra.c Modules/help.c Modules/run_program.c
+	$(CC) -g Modules/main.c Modules/BFS.c Modules/graph_maker.c Modules/file_maker.c Modules/File_reader.c Modules/check_input.c Modules/Dijkstra.c Modules/help.c Modules/run_program.c Modules/check_file_format.c Modules/write_error.c
 
 Dijkstra.o: Modules/Dijkstra.h
 	$(CC) -c Modules/Dijkstra.c
+
+write_error.o: Modules/write_error.h
+	$(CC) -c Modules/write_error.c
 
 check_input.o: Modules/check_input.h
 	$(CC) -c Modules/check_input.c
@@ -22,6 +25,9 @@ file_maker.o: Modules/graph_maker.h Modules/file_maker.h
 File_reader.o: Modules/File_reader.h
 	$(CC) -c Modules/File_reader.c
 
+check_file_format.o: Modules/check_file_format.h
+	$(CC) -c Modules/check_file_format.c
+
 main.o: Modules/BFS.h Modules/graph_maker.h Modules/file_maker.h Modules/File_reader.h Modules/graph_maker.h Modules/check_input.h Modules/Dijkstra.h
 	$(CC) -c Modules/main.c
 
@@ -30,6 +36,8 @@ help.o: Modules/help.h
 
 run_program.o: Modules/run_program.h Modules/BFS.h Modules/graph_maker.h Modules/file_maker.h Modules/File_reader.h Modules/graph_maker.h Modules/check_input.h Modules/Dijkstra.h
 	$(CC) -c Modules/run_program.c
+
+
 
 
 .PHONY: clean
